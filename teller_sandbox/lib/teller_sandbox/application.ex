@@ -8,7 +8,8 @@ defmodule TellerSandbox.Application do
   @impl true
   def start(_type, _args) do
     children = [
-
+      # Start the Ecto repository
+      # TellerSandbox.Repo,
       # Start the Telemetry supervisor
       TellerSandboxWeb.Telemetry,
       # Start the PubSub system

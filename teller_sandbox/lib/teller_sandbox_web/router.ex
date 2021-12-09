@@ -19,7 +19,6 @@ defmodule TellerSandboxWeb.Router do
     pipe_through :browser
 
     get "/", HelloController, :index
-    #get "/:message", HelloController, :show
     get "/accounts", AccountController, :index
   end
 

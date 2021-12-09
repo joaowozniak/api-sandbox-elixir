@@ -10,7 +10,7 @@ defmodule TellerSandboxWeb.Endpoint do
     signing_salt: "BVUlc/Jw"
   ]
 
-  socket "/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]]
+  # socket "/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]]
 
   # Serve at "/" the static files from "priv/static" directory.
   #
