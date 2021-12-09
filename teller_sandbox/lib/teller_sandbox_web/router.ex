@@ -8,7 +8,7 @@ defmodule TellerSandboxWeb.Router do
     plug :put_root_layout, {TellerSandboxWeb.LayoutView, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
-    plug TellerSandboxWeb.Plugs.Locale, "en"
+    plug TellerSandboxWeb.Plugs.Authentication
   end
 
   pipeline :api do
