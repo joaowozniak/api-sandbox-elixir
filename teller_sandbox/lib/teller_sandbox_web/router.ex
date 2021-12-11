@@ -19,7 +19,7 @@ defmodule TellerSandboxWeb.Router do
     pipe_through :browser
 
     get "/", HelloController, :index
-    get "/accounts", AccountController, :index
+    get "/accounts", AccountController, :get_accounts
   end
 
   # Other scopes may use custom stacks.

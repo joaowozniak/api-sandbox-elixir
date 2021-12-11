@@ -5,12 +5,12 @@ defmodule TellerSandboxWeb.Plugs.Authentication do
 
   def call(conn, _opts) do
     with {user, pass} <- Plug.BasicAuth.parse_basic_auth(conn),
-        {:valid, accounts} <- verify_user(user, pass) do
+        {:valid, _} <- verify_user(user, pass) do
 
           token = token_from_user(user)
 
       assign(conn, :token, token)
-      assign(conn, :accounts, accounts)
+
     else
       _ -> Plug.BasicAuth.request_basic_auth(conn) |> halt()
     end
@@ -24,14 +24,14 @@ defmodule TellerSandboxWeb.Plugs.Authentication do
       Regex.match?(~r{\A\d*\z}, String.slice(user, 5, 9)) &&
       String.length(password) == 0) ->
 
-        {:valid, "one"}
+        {:valid, true}
 
       (String.starts_with?(user, "user_multiple") &&
       String.length(user) == 19 &&
       Regex.match?(~r{\A\d*\z}, String.slice(user, 14, 18)) &&
       String.length(password) == 0) ->
 
-        {:valid, "multiple"}
+        {:valid, true}
 
       true -> {:not_valid, false}
 
