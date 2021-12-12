@@ -22,15 +22,14 @@ defmodule TellerSandbox.Contexts.Accounts do
     :sha256 |> :crypto.hash(token) |> :erlang.phash2()
   end
 
-  def from_token(token) do
-
+  def generate_account(token) do
     currency = "USD"
     enrollment_id = "enr_" <> (:sha256 |> :crypto.hash(token) |> Base.encode32 |> String.downcase() |> String.slice(20,20))
     id = "acc_" <> (:sha256 |> :crypto.hash(token) |> Base.encode16 |> String.downcase() |> String.slice(0,20))
     account_number = get_pseudo_random_from_token(token)
     institution = Institutions.from_token(token)
     last_four = String.slice(Integer.to_string(account_number), -4, 4)
-    links = %AccountLink {
+    links = %AccountLink{
         balances: @base_link <> "#{id}/balances",
         details: @base_link <> "#{id}/details",
         self: @base_link <> "#{id}",
@@ -40,8 +39,7 @@ defmodule TellerSandbox.Contexts.Accounts do
     subtype = "checking"
     type = "depository"
 
-    [
-      %Account{
+    %Account{
       currency: currency,
       enrollment_id: enrollment_id,
       id: id,
@@ -51,8 +49,22 @@ defmodule TellerSandbox.Contexts.Accounts do
       name: name,
       subtype: subtype,
       type: type
-      }
-    ]
+    }
+  end
 
+  def from_token(token) do
+
+    acc_one = generate_account(token)
+
+    cond do
+      (String.length(token) == 33) ->
+
+        acc_two = generate_account(token)
+        [acc_one, acc_two]
+
+      (String.length(token) == 21) -> [acc_one]
+
+      true -> {:not_valid, false}
+    end
   end
 end

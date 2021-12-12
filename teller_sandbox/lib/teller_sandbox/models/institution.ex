@@ -4,7 +4,6 @@ defmodule TellerSandbox.Models.Institution do
 
   embedded_schema do
     field(:name, :string)
-    #field(:id, :string)
   end
 
 end

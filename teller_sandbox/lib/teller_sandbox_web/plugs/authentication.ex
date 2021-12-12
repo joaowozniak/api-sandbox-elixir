@@ -21,14 +21,14 @@ defmodule TellerSandboxWeb.Plugs.Authentication do
 
       (String.starts_with?(user, "user_") &&
       String.length(user) == 10 &&
-      Regex.match?(~r{\A\d*\z}, String.slice(user, 5, 9)) &&
+      Regex.match?(~r{\A\d*\z}, String.slice(user, 5, 5)) &&
       String.length(password) == 0) ->
 
         {:valid, true}
 
       (String.starts_with?(user, "user_multiple") &&
       String.length(user) == 19 &&
-      Regex.match?(~r{\A\d*\z}, String.slice(user, 14, 18)) &&
+      Regex.match?(~r{\A\d*\z}, String.slice(user, 14, 5)) &&
       String.length(password) == 0) ->
 
         {:valid, true}
