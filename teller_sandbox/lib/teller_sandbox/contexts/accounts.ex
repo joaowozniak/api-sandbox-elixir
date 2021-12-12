@@ -5,7 +5,7 @@ defmodule TellerSandbox.Contexts.Accounts do
 
   @base_link "http://localhost:4000/accounts/"
 
-  def get_all_account_names do
+  defp get_all_account_names do
     names = [
         "My Checking",
         "Jimmy Carter",
@@ -18,11 +18,11 @@ defmodule TellerSandbox.Contexts.Accounts do
     ]
   end
 
-  def get_pseudo_random_from_token(token) do
+  defp get_pseudo_random_from_token(token) do
     :sha256 |> :crypto.hash(token) |> :erlang.phash2()
   end
 
-  def generate_account(token) do
+  defp generate_account(token) do
     currency = "USD"
     enrollment_id = "enr_" <> (:sha256 |> :crypto.hash(token) |> Base.encode32 |> String.downcase() |> String.slice(20,20))
     id = "acc_" <> (:sha256 |> :crypto.hash(token) |> Base.encode16 |> String.downcase() |> String.slice(0,20))
@@ -67,4 +67,5 @@ defmodule TellerSandbox.Contexts.Accounts do
       true -> {:not_valid, false}
     end
   end
+
 end
