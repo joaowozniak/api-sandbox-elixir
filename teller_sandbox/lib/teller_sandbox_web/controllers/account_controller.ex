@@ -1,10 +1,10 @@
 defmodule TellerSandboxWeb.AccountController do
   use TellerSandboxWeb, :controller
-  alias TellerSandbox.Contexts.Account
+  alias TellerSandbox.Contexts.Accounts
 
   def get_accounts(conn, _params) do
 
-    accounts = Account.from_token(conn.assigns.token)
+    accounts = Accounts.from_token(conn.assigns.token)
 
     conn
     |>json(accounts)
