@@ -3,7 +3,6 @@ defmodule TellerSandboxWeb.AccountController do
   alias TellerSandbox.Contexts.Accounts
 
   def get_accounts(conn, _params) do
-
     accounts = Accounts.from_token(conn.assigns.token, "accounts")
 
     conn |> json(accounts)

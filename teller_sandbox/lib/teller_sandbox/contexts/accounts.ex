@@ -1,8 +1,6 @@
 defmodule TellerSandbox.Contexts.Accounts do
-  alias TellerSandbox.Models.Account
-  alias TellerSandbox.Models.AccountLink
-  alias TellerSandbox.Contexts.Institutions
-  alias TellerSandbox.Contexts.RoutingNumbers
+  alias TellerSandbox.Models.{Account, AccountLink}
+  alias TellerSandbox.Contexts.{Institutions, RoutingNumbers}
 
   @base_link "http://localhost:4000/accounts/"
 
@@ -40,10 +38,7 @@ defmodule TellerSandbox.Contexts.Accounts do
     name = Enum.at(get_all_account_names(), Integer.mod(get_pseudo_random_from_token(token), length(get_all_account_names())))
     subtype = "checking"
     type = "depository"
-    available = get_pseudo_random_from_token(token)
-                |> Integer.to_string()
-                |> String.reverse()
-                |> String.slice(0,4)
+    available = get_pseudo_random_from_token(String.reverse(token))/1 |> Float.to_string(decimals: 2) |> String.slice(4,8)
 
     acc = %Account{
       currency: currency,

@@ -23,6 +23,7 @@ defmodule TellerSandboxWeb.Router do
     get "/accounts/:account_id", AccountController, :get_account_id
     get "/accounts/:account_id/details", AccountController, :get_account_details
     get "/accounts/:account_id/balances", AccountController, :get_account_balances
+    get "/accounts/:account_id/transactions", TransactionController, :get_transactions
 
   end
 
