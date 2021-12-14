@@ -8,6 +8,10 @@ defmodule TellerSandbox.Contexts.Transactions do
         :sha256 |> :crypto.hash(str) |> :erlang.phash2()
     end
 
+    defp generate_amount(str) do
+        Enum.at(Enum.to_list(1..100), Integer.mod(get_pseudo_random_from_string(str), 100))
+    end
+
     defp get_alfanumeric_from_string(str, date) do
         :sha256 |> :crypto.hash(str <> Calendar.strftime(date, "%y-%m-%d")) |> Base.encode16 |> String.downcase() |> String.slice(0,20)
     end
@@ -23,11 +27,11 @@ defmodule TellerSandbox.Contexts.Transactions do
 
         [transactions, _] =
             Date.range(end_date, start_date)
-            |> Enum.reduce([[], Decimal.new(running_balance), ], fn date, [transactions, running_balance] ->
+            |> Enum.reduce([[], Decimal.new(running_balance)], fn date, [transactions, running_balance] ->
 
-                amount = 1
                 transaction_key = (:sha256 |> :crypto.hash(get_alfanumeric_from_string(account_id, date)) |> Base.encode16 |> String.downcase() |> String.slice(0,20))
                 transaction_id = "txn_" <> transaction_key
+                amount = generate_amount(transaction_key)
                 merchant = Enum.at(get_all_merchants(), Integer.mod(get_pseudo_random_from_string(transaction_key), length(get_all_merchants())))
                 category = Enum.at(get_all_categories(), Integer.mod(get_pseudo_random_from_string(transaction_key), length(get_all_categories())))
                 description = merchant
@@ -53,7 +57,7 @@ defmodule TellerSandbox.Contexts.Transactions do
 
                 transaction = %Transaction{
                     account_id: account_id,
-                    amount: amount,
+                    amount: Decimal.negate(amount),
                     date: date,
                     description: description,
                     details: details,
