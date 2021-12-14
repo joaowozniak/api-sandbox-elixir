@@ -61,16 +61,18 @@ defmodule TellerSandbox.Contexts.Accounts do
     cond do
 
       type == "accounts" ->
-        keys = {:currency, :enrollment_id, :id, :institution, :last_four, :links, :name, :subtype, :type}
-        account = Map.take(account, Tuple.to_list(keys))
+        keys = [:currency, :enrollment_id, :id, :institution, :last_four, :links, :name, :subtype, :type]
+        account = Map.take(account, keys)
 
       type == "details" ->
-        keys = {:id, :account_number, :links, :routing_numbers}
-        account = Map.take(account, Tuple.to_list(keys))
+        keys = [:id, :account_number, :links, :routing_numbers]
+        account = Map.take(account,keys)
 
-        type == "balances" ->
-          keys = {:id, :available, :ledger, :links}
-          account = Map.take(account, Tuple.to_list(keys))
+      type == "balances" ->
+        keys = [:id, :available, :ledger, :links]
+        account = Map.take(account, keys)
+
+      true -> account
     end
   end
 
@@ -81,6 +83,7 @@ defmodule TellerSandbox.Contexts.Accounts do
     cond do
       (String.length(token) == 33) ->
 
+        #TODO improve generating pseudo random number of accounts of user_multiple
         token_2 = String.reverse(token)
         acc_two = generate_account(token_2)
         [show_account_attributes(acc_one, type), show_account_attributes(acc_two, type)]
