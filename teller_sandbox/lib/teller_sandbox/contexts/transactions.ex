@@ -21,11 +21,11 @@ defmodule TellerSandbox.Contexts.Transactions do
         running_balance = account.available
         account_id = account.id
 
-        transactions =
+        [transactions, _] =
             Date.range(end_date, start_date)
-            |> Enum.reduce([], fn date, transactions ->
+            |> Enum.reduce([[], Decimal.new(running_balance), ], fn date, [transactions, running_balance] ->
 
-                amount = -1
+                amount = 1
                 transaction_key = (:sha256 |> :crypto.hash(get_alfanumeric_from_string(account_id, date)) |> Base.encode16 |> String.downcase() |> String.slice(0,20))
                 transaction_id = "txn_" <> transaction_key
                 merchant = Enum.at(get_all_merchants(), Integer.mod(get_pseudo_random_from_string(transaction_key), length(get_all_merchants())))
@@ -48,7 +48,6 @@ defmodule TellerSandbox.Contexts.Transactions do
                     self: @base_link <> "#{account_id}" <> "/transactions/" <> transaction_id
                 }
 
-                transaction_amount = 100
                 status = "posted"
                 type = "card_payment"
 
@@ -64,14 +63,14 @@ defmodule TellerSandbox.Contexts.Transactions do
                     status: status,
                     type: type
                 }
+
                 running_balance = Decimal.sub(running_balance, amount)
 
-                [transaction | transactions]
+                [[transaction | transactions], running_balance]
             end)
 
         transactions
     end
-
 
 
     defp get_all_merchants() do
