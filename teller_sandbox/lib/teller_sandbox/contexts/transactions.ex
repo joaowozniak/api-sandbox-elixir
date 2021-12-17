@@ -9,7 +9,8 @@ defmodule TellerSandbox.Contexts.Transactions do
     end
 
     defp generate_amount(str) do
-        Enum.at(Enum.to_list(1..100), Integer.mod(get_pseudo_random_from_string(str), 100))
+        max_val = 100
+        Enum.at(Enum.to_list(1..max_val), Integer.mod(get_pseudo_random_from_string(str), max_val))
     end
 
     defp get_alfanumeric_from_string(str, date) do
@@ -20,10 +21,10 @@ defmodule TellerSandbox.Contexts.Transactions do
     def generate_transactions(account) do
 
         start_date = Date.utc_today()
-        end_date = Date.add(start_date, -5)
+        end_date = Date.add(start_date, -89)
 
         running_balance = account.available
-        account_id = account.id
+        account_id = account.account_id
 
         [transactions, _] =
             Date.range(end_date, start_date)
@@ -74,6 +75,11 @@ defmodule TellerSandbox.Contexts.Transactions do
             end)
 
         transactions
+    end
+
+
+    def get_by_id(transactions, transaction_id) do
+        Enum.find(transactions, fn trans -> trans.id == transaction_id end)
     end
 
 

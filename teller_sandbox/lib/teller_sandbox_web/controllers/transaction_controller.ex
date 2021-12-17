@@ -4,7 +4,7 @@ defmodule TellerSandboxWeb.TransactionController do
 
   def get_transactions(conn, %{"account_id" => account_id}) do
     with accounts <- Accounts.from_token(conn.assigns.token, true),
-      account <- Enum.find(accounts, fn acc -> acc.id == account_id end) do
+      account <- Accounts.get_by_id(accounts, account_id) do
 
         cond do
           account ->
@@ -20,12 +20,12 @@ defmodule TellerSandboxWeb.TransactionController do
 
   def get_transaction_id(conn, %{"account_id" => account_id, "transaction_id" => transaction_id}) do
     with accounts <- Accounts.from_token(conn.assigns.token, true),
-      account <- Enum.find(accounts, fn acc -> acc.id == account_id end) do
+      account <- Accounts.get_by_id(accounts, account_id) do
 
         cond do
           account ->
             transactions = Transactions.generate_transactions(account)
-            transaction = Enum.find(transactions, fn trans -> trans.id == transaction_id end)
+            transaction = Transactions.get_by_id(transactions, transaction_id)
 
             cond do
               transaction ->

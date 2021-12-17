@@ -16,8 +16,7 @@ defmodule TellerSandboxWeb.AccountController do
 
   def get_account_id(conn, %{"account_id" => account_id}) do
     with accounts <- Accounts.from_token(conn.assigns.token, "accounts"),
-    #change to Account.get_by_id
-      account <- Enum.find(accounts, fn acc -> acc.id == account_id end) do
+      account <- Accounts.get_by_id(accounts, account_id) do
 
       cond do
         account ->
@@ -32,11 +31,10 @@ defmodule TellerSandboxWeb.AccountController do
 
   def get_account_details(conn, %{"account_id" => account_id}) do
     with accounts <- Accounts.from_token(conn.assigns.token, "details"),
-      account <- Enum.find(accounts, fn acc -> acc.id == account_id  end) do
+      account <- Enum.find(accounts, fn acc -> acc.account_id == account_id end) do
 
       cond do
         account ->
-          account = Enum.map([account], &(with {k, v} <- Map.pop(&1, :id), do: Map.put(v, :account_id, k)))
           conn |> json(account)
 
         true ->
@@ -48,11 +46,10 @@ defmodule TellerSandboxWeb.AccountController do
 
   def get_account_balances(conn, %{"account_id" => account_id}) do
     with accounts <- Accounts.from_token(conn.assigns.token, "balances"),
-      account <- Enum.find(accounts, fn acc -> acc.id == account_id  end) do
+      account <- Enum.find(accounts, fn acc -> acc.account_id == account_id end) do
 
       cond do
         account ->
-          account = Enum.map([account], &(with {k, v} <- Map.pop(&1, :id), do: Map.put(v, :account_id, k)))
           conn |> json(account)
 
         true ->
