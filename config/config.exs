@@ -8,7 +8,7 @@
 import Config
 
 #config :teller_sandbox,
-  #ecto_repos: [TellerSandbox.Repo]
+#  ecto_repos: [TellerSandbox.Repo]
 
 # Configures the endpoint
 config :teller_sandbox, TellerSandboxWeb.Endpoint,
