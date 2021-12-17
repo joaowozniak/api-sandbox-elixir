@@ -17,10 +17,10 @@ defmodule TellerSandbox.Contexts.Accounts do
     last_four = account_number |> String.slice(-4, 4)
     links = []
     routing_numbers = RoutingNumbers.from_institution(institution.id)
-    name = Enum.at(get_all_account_names(), Integer.mod(get_pseudo_random_from_token(token), length(get_all_account_names())))
+    name = Enum.at(get_all_account_names(), Integer.mod(get_pseudo_random_from_token(String.reverse(token)), length(get_all_account_names())))
     subtype = "checking"
     type = "depository"
-    available = get_pseudo_random_from_token(String.reverse(token)) |> Integer.to_string() |> String.slice(0,5)
+    available = get_pseudo_random_from_token(token) |> Integer.to_string() |> String.slice(0,5)
 
     acc = %Account{
       currency: currency,
@@ -38,6 +38,7 @@ defmodule TellerSandbox.Contexts.Accounts do
       available: available,
       ledger: available
     }
+    acc
   end
 
   def show_account_attributes(account, view) do
@@ -54,6 +55,7 @@ defmodule TellerSandbox.Contexts.Accounts do
         account = Map.put(account, :links, links)
         keys = [:currency, :enrollment_id, :id, :institution, :last_four, :links, :name, :subtype, :type]
         account = Map.take(account, keys)
+        account
 
 
       view == "details" ->
@@ -65,6 +67,7 @@ defmodule TellerSandbox.Contexts.Accounts do
         account = Map.put(account, :links, links)
         keys = [:account_id, :account_number, :links, :routing_numbers]
         account = Map.take(account,keys)
+        account
 
       view == "balances" ->
 
@@ -75,6 +78,7 @@ defmodule TellerSandbox.Contexts.Accounts do
         account = Map.put(account, :links, links)
         keys = [:account_id, :available, :ledger, :links]
         account = Map.take(account, keys)
+        account
 
       true -> account
     end
@@ -117,7 +121,7 @@ defmodule TellerSandbox.Contexts.Accounts do
 
 
   defp get_all_account_names do
-    names = [
+    [
         "My Checking",
         "Jimmy Carter",
         "Ronald Reagan",

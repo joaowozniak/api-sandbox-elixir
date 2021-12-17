@@ -7,8 +7,8 @@
 # General application configuration
 import Config
 
-config :teller_sandbox,
-  ecto_repos: [TellerSandbox.Repo]
+#config :teller_sandbox,
+  #ecto_repos: [TellerSandbox.Repo]
 
 # Configures the endpoint
 config :teller_sandbox, TellerSandboxWeb.Endpoint,

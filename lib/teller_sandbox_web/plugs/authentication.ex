@@ -41,6 +41,7 @@ defmodule TellerSandboxWeb.Plugs.Authentication do
   defp token_from_user(user) do
     encoded = Base.encode64(user)
     token = "test_" <> encoded
+    token
   end
 
 end

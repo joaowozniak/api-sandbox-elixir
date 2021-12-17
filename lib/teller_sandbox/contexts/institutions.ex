@@ -2,7 +2,7 @@ defmodule TellerSandbox.Contexts.Institutions do
   alias TellerSandbox.Models.Institution
 
   def get_all_institutions() do
-    institutions = [
+    [
       %{id: "chase", name: "Chase"},
       %{id: "bank_of_america", name: "Bank of America"},
       %{id: "wells_fargo", name: "Wells Fargo"},

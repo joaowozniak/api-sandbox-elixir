@@ -1,6 +1,5 @@
 defmodule TellerSandbox.Contexts.Transactions do
-    alias TellerSandbox.Contexts.Accounts
-    alias TellerSandbox.Models.{Account,Transaction, Counterparty, TransactionDetail, TransactionLink}
+    alias TellerSandbox.Models.{Transaction, Counterparty, TransactionDetail, TransactionLink}
 
     @base_link "http://localhost:4000/accounts/"
 
@@ -84,7 +83,7 @@ defmodule TellerSandbox.Contexts.Transactions do
 
 
     defp get_all_merchants() do
-        merchants = [
+        [
             "Uber",
             "Uber Eats",
             "Lyft",
@@ -166,7 +165,7 @@ defmodule TellerSandbox.Contexts.Transactions do
     end
 
     defp get_all_categories() do
-        categories = [
+        [
             "accommodation",
             "advertising",
             "bar",
