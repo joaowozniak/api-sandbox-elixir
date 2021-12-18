@@ -24,7 +24,10 @@ defmodule TellerSandboxWeb.TransactionControllerTest do
 
       decoded = Jason.decode!(response.resp_body)
       assert length(decoded) == 90
-      assert response.resp_body == File.read!("test/support/transactions.json")
+
+      trans_0=Enum.at(decoded, 0)
+      trans_1=Enum.at(decoded, 1)
+      assert Decimal.sub(Decimal.new(trans_1["running_balance"]), Decimal.negate(trans_1["amount"])) == Decimal.new(trans_0["running_balance"])
     end
   end
 
