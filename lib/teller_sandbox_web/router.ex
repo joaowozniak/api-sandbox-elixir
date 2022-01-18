@@ -1,22 +1,13 @@
 defmodule TellerSandboxWeb.Router do
   use TellerSandboxWeb, :router
 
-  pipeline :browser do
-    plug :accepts, ["html"]
-    plug :fetch_session
-    plug :fetch_live_flash
-    plug :put_root_layout, {TellerSandboxWeb.LayoutView, :root}
-    plug :protect_from_forgery
-    plug :put_secure_browser_headers
+  pipeline :api do
+    plug :accepts, ["json"]
     plug TellerSandboxWeb.Plugs.Authentication
   end
 
-  pipeline :api do
-    plug :accepts, ["json"]
-  end
-
   scope "/", TellerSandboxWeb do
-    pipe_through :browser
+    pipe_through :api
 
     get "/", HelloController, :index
     get "/accounts", AccountController, :get_accounts
@@ -24,7 +15,10 @@ defmodule TellerSandboxWeb.Router do
     get "/accounts/:account_id/details", AccountController, :get_account_details
     get "/accounts/:account_id/balances", AccountController, :get_account_balances
     get "/accounts/:account_id/transactions", TransactionController, :get_transactions
-    get "/accounts/:account_id/transactions/:transaction_id", TransactionController, :get_transaction_id
+
+    get "/accounts/:account_id/transactions/:transaction_id",
+        TransactionController,
+        :get_transaction_id
   end
 
   # Other scopes may use custom stacks.
@@ -42,13 +36,14 @@ defmodule TellerSandboxWeb.Router do
   '''
   if Mix.env() in [:dev, :test] do
     import Phoenix.LiveDashboard.Router
-
+  
     scope "/" do
       pipe_through :browser
       live_dashboard "/dashboard", metrics: TellerSandboxWeb.Telemetry
     end
   end
   '''
+
   # Enables the Swoosh mailbox preview in development.
   #
   # Note that preview only shows emails that were sent by the same
@@ -57,7 +52,7 @@ defmodule TellerSandboxWeb.Router do
   if Mix.env() == :dev do
     scope "/dev" do
       pipe_through :browser
-
+  
       #forward "/mailbox", Plug.Swoosh.MailboxPreview
     end
   end
