@@ -1,70 +1,90 @@
 defmodule TellerSandbox.Contexts.Accounts do
-  # alias TellerSandbox.Models.{Account, AccountLink, AccountLinkShort}
-  alias TellerSandbox.Contexts.{Institutions, RoutingNumbers}
+  alias TellerSandbox.Randomizer.Id
+  alias TellerSandbox.Data.{Institutions, Names}
 
   @base_link "http://localhost:4000/accounts/"
 
-  defp get_pseudo_random_from_token(token) do
-    :sha256 |> :crypto.hash(token) |> :erlang.phash2()
+  def all(token) do
+    [generate_account(token)]
+  end
+
+  def show(token, acc_id) do
+    [Enum.find([generate_account(token)], fn acc -> acc.id == acc_id end)]
+  end
+
+  def from_token(token, view) do
+    cond do
+      String.length(token) == 33 ->
+        max_nr_of_accounts = 2
+
+        range =
+          Enum.at(
+            Enum.to_list(1..max_nr_of_accounts),
+            Integer.mod(Id.get_numeric(token), max_nr_of_accounts)
+          )
+
+        iterator = Enum.to_list(0..range)
+
+        [accounts, _] =
+          iterator
+          |> Enum.reduce([[], token], fn i, [accounts, token] ->
+            account = generate_account(token)
+            token = randomize(token, i)
+            [[show_account_attributes(account, view) | accounts], token]
+          end)
+
+        accounts
+
+      String.length(token) == 21 ->
+        acc_one = generate_account(token)
+        [show_account_attributes(acc_one, view)]
+    end
   end
 
   defp generate_account(token) do
-    currency = "USD"
-
-    enrollment_id =
-      "enr_" <>
-        (:sha256
-         |> :crypto.hash(token)
-         |> Base.encode32()
-         |> String.downcase()
-         |> String.slice(20, 20))
-
-    id =
-      "acc_" <>
-        (:sha256
-         |> :crypto.hash(token)
-         |> Base.encode16()
-         |> String.downcase()
-         |> String.slice(0, 20))
-
-    account_number = get_pseudo_random_from_token(token) |> Integer.to_string()
-    institution = Institutions.from_token(token)
-    last_four = account_number |> String.slice(-4, 4)
-    links = []
-    routing_numbers = RoutingNumbers.from_institution(institution.id)
-
-    name =
-      Enum.at(
-        get_all_account_names(),
-        Integer.mod(
-          get_pseudo_random_from_token(String.reverse(token)),
-          length(get_all_account_names())
-        )
-      )
-
-    subtype = "checking"
-    type = "depository"
-    available = get_pseudo_random_from_token(token) |> Integer.to_string() |> String.slice(0, 5)
-
-    acc = %{
-      currency: currency,
-      enrollment_id: enrollment_id,
-      id: id,
-      account_id: id,
-      account_number: account_number,
-      institution: institution,
-      last_four: last_four,
-      links: links,
-      routing_numbers: routing_numbers,
-      name: name,
-      subtype: subtype,
-      type: type,
-      available: available,
-      ledger: available
+    %{
+      currency: gen_currency(token),
+      enrollment_id: gen_enrollment_id(token),
+      id: gen_id(token),
+      # account_id: gen_id(token),
+      # account_number: gen_account_number(token),
+      institution: gen_institution(token),
+      last_four: gen_last_four(token),
+      links: gen_links(gen_id(token)),
+      # routing_numbers: gen_routing_numbers(token),
+      name: gen_name(token),
+      subtype: gen_subtype(token),
+      type: gen_type(token)
+      # available: gen_available(token),
+      # ledger: gen_available(token)
     }
-
-    acc
   end
+
+  defp gen_currency(_token), do: "USD"
+  defp gen_enrollment_id(token), do: "enr_" <> Id.get_id_two(token)
+  defp gen_id(token), do: "acc_" <> Id.get_id_one(token)
+  defp gen_account_number(token), do: Id.get_numeric(token) |> Integer.to_string()
+  defp gen_institution(token), do: Institutions.get_inst(token)
+  defp gen_last_four(token), do: gen_account_number(token) |> String.slice(-4, 4)
+
+  defp gen_links(acc_id) do
+    %{
+      balances: @base_link <> "#{acc_id}/balances",
+      details: @base_link <> "#{acc_id}/details",
+      self: @base_link <> "#{acc_id}",
+      transactions: @base_link <> "#{acc_id}/transactions"
+    }
+  end
+
+  defp gen_routing_numbers(token),
+    do: Id.get_numeric(gen_institution(token).id) |> Integer.to_string()
+
+  defp gen_name(token), do: Names.gen_acc_name(token)
+  defp gen_subtype(_token), do: "checking"
+  defp gen_type(_token), do: "depository"
+
+  defp gen_available(token),
+    do: Id.get_numeric(token) |> Integer.to_string() |> String.slice(0, 5)
 
   def show_account_attributes(account, view) do
     cond do
@@ -120,55 +140,9 @@ defmodule TellerSandbox.Contexts.Accounts do
     end
   end
 
-  def from_token(token, view) do
-    cond do
-      String.length(token) == 33 ->
-        max_nr_of_accounts = 2
-
-        range =
-          Enum.at(
-            Enum.to_list(1..max_nr_of_accounts),
-            Integer.mod(get_pseudo_random_from_token(token), max_nr_of_accounts)
-          )
-
-        iterator = Enum.to_list(0..range)
-
-        [accounts, _] =
-          iterator
-          |> Enum.reduce([[], token], fn i, [accounts, token] ->
-            account = generate_account(token)
-            token = randomize(token, i)
-            [[show_account_attributes(account, view) | accounts], token]
-          end)
-
-        accounts
-
-      String.length(token) == 21 ->
-        acc_one = generate_account(token)
-        [show_account_attributes(acc_one, view)]
-    end
-  end
-
-  def get_by_id(accounts, account_id) do
-    Enum.find(accounts, fn acc -> acc.id == account_id end)
-  end
-
   defp randomize(token, iterator) do
     :sha256
     |> :crypto.hash(token |> String.slice(iterator * 11, String.length(token)))
     |> Base.encode64()
-  end
-
-  defp get_all_account_names do
-    [
-      "My Checking",
-      "Jimmy Carter",
-      "Ronald Reagan",
-      "George H. W. Bush",
-      "Bill Clinton",
-      "George W. Bush",
-      "Barack Obama",
-      "Donald Trump"
-    ]
   end
 end
