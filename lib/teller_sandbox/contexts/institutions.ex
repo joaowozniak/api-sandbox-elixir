@@ -1,5 +1,5 @@
 defmodule TellerSandbox.Contexts.Institutions do
-  alias TellerSandbox.Models.Institution
+  # alias TellerSandbox.Models.Institution
 
   def get_all_institutions() do
     [
@@ -16,11 +16,15 @@ defmodule TellerSandbox.Contexts.Institutions do
   end
 
   def from_token(token) do
-    institution = Enum.at(get_all_institutions(), Integer.mod(get_pseudo_random_from_token(token), length(get_all_institutions())))
-    %Institution{
+    institution =
+      Enum.at(
+        get_all_institutions(),
+        Integer.mod(get_pseudo_random_from_token(token), length(get_all_institutions()))
+      )
+
+    %{
       id: institution.id,
       name: institution.name
     }
   end
-
 end
