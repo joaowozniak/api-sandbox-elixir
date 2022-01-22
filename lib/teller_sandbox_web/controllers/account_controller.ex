@@ -19,8 +19,7 @@ defmodule TellerSandboxWeb.AccountController do
   end
 
   def get_account_details(conn, %{"account_id" => account_id}) do
-    with accounts <- Accounts.from_token(conn.assigns.token, "details"),
-         account <- Enum.find(accounts, fn acc -> acc.account_id == account_id end) do
+    with account <- Accounts.details(conn.assigns.token, account_id) do
       cond do
         account ->
           conn |> json(account)
@@ -32,8 +31,7 @@ defmodule TellerSandboxWeb.AccountController do
   end
 
   def get_account_balances(conn, %{"account_id" => account_id}) do
-    with accounts <- Accounts.from_token(conn.assigns.token, "balances"),
-         account <- Enum.find(accounts, fn acc -> acc.account_id == account_id end) do
+    with account <- Accounts.balances(conn.assigns.token, account_id) do
       cond do
         account ->
           conn |> json(account)

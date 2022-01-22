@@ -1,5 +1,5 @@
 defmodule TellerSandbox.Contexts.Transactions do
-  # alias TellerSandbox.Models.{Transaction, Counterparty, TransactionDetail, TransactionLink}
+  alias TellerSandbox.Data.{Merchants}
 
   @base_link "http://localhost:4000/accounts/"
 
@@ -22,7 +22,7 @@ defmodule TellerSandbox.Contexts.Transactions do
 
   def generate_transactions(account) do
     start_date = Date.utc_today()
-    end_date = Date.add(start_date, -89)
+    end_date = Date.add(start_date, -10)
 
     running_balance = account.available
     account_id = account.account_id
@@ -41,23 +41,9 @@ defmodule TellerSandbox.Contexts.Transactions do
         transaction_id = "txn_" <> transaction_key
         amount = generate_amount(transaction_key)
 
-        merchant =
-          Enum.at(
-            get_all_merchants(),
-            Integer.mod(
-              get_pseudo_random_from_string(transaction_key),
-              length(get_all_merchants())
-            )
-          )
+        merchant = Merchants.gen_merch(transaction_key)
 
-        category =
-          Enum.at(
-            get_all_categories(),
-            Integer.mod(
-              get_pseudo_random_from_string(transaction_key),
-              length(get_all_categories())
-            )
-          )
+        category = Merchants.gen_categ(transaction_key)
 
         description = merchant
 
@@ -103,115 +89,5 @@ defmodule TellerSandbox.Contexts.Transactions do
 
   def get_by_id(transactions, transaction_id) do
     Enum.find(transactions, fn trans -> trans.id == transaction_id end)
-  end
-
-  defp get_all_merchants() do
-    [
-      "Uber",
-      "Uber Eats",
-      "Lyft",
-      "Five Guys",
-      "In-N-Out Burger",
-      "Chick-Fil-A",
-      "AMC",
-      "Apple",
-      "Amazon",
-      "Walmart",
-      "Target",
-      "Hotel Tonight",
-      "Misson Ceviche",
-      "The",
-      "Caltrain",
-      "Wingstop",
-      "Slim Chickens",
-      "CVS",
-      "Duane Reade",
-      "Walgreens",
-      "Roo",
-      "McDonald's",
-      "Burger King",
-      "KFC",
-      "Popeye's",
-      "Shake Shack",
-      "Lowe's",
-      "The Ho",
-      "Costco",
-      "Kroger",
-      "iTunes",
-      "Spotify",
-      "Best Buy",
-      "TJ Maxx",
-      "Aldi",
-      "Dollar",
-      "Macy's",
-      "H.E. Butt",
-      "Dollar Tree",
-      "Verizon Wireless",
-      "Sprint PCS",
-      "T-Mobil",
-      "Starbucks",
-      "7-Eleven",
-      "AT&T Wireless",
-      "Rite Aid",
-      "Nordstrom",
-      "Ross",
-      "Gap",
-      "Bed, Bath & Beyond",
-      "J.C. Penney",
-      "Subway",
-      "O'Reilly",
-      "Wendy's",
-      "Dunkin' D",
-      "Petsmart",
-      "Dick's Sporting Goods",
-      "Sears",
-      "Staples",
-      "Domino's Pizza",
-      "Pizz",
-      "Papa John's",
-      "IKEA",
-      "Office Depot",
-      "Foot Locker",
-      "Lids",
-      "GameStop",
-      "Sepho",
-      "Panera",
-      "Williams-Sonoma",
-      "Saks Fifth Avenue",
-      "Chipotle Mexican Grill",
-      "Exx",
-      "Neiman Marcus",
-      "Jack In The Box",
-      "Sonic",
-      "Shell"
-    ]
-  end
-
-  defp get_all_categories() do
-    [
-      "accommodation",
-      "advertising",
-      "bar",
-      "charity",
-      "clothing",
-      "dining",
-      "education",
-      "entertainment",
-      "fuel",
-      "groceries",
-      "health",
-      "home",
-      "income",
-      "insurance",
-      "office",
-      "phone",
-      "service",
-      "shopping",
-      "software",
-      "sport",
-      "tax",
-      "transportion",
-      "utilities"
-    ]
   end
 end
