@@ -1,5 +1,5 @@
 defmodule TellerSandbox.Contexts.Accounts do
-  alias TellerSandbox.Randomizer.Id
+  alias TellerSandbox.Randomizer.{Id, Numeric}
   alias TellerSandbox.Data.{Institutions, Names}
 
   @base_link "http://localhost:4000/accounts/"
@@ -25,13 +25,13 @@ defmodule TellerSandbox.Contexts.Accounts do
 
       String.length(token) == 33 ->
         nr_accounts = 3
-        acs = generate_accounts(token, nr_accounts)
-        Enum.map(acs, fn i -> Map.take(i, @accounts) end)
+        accs = generate_many_accounts(token, nr_accounts)
+        Enum.map(accs, fn i -> Map.take(i, @accounts) end)
     end
   end
 
-  defp generate_accounts(token, nr_accs) do
-    Enum.map(1..nr_accs, fn i -> generate_account(gen_id(Id.randomize(token, i))) end)
+  defp generate_many_accounts(token, nr_accounts) do
+    Enum.map(1..nr_accounts, fn i -> generate_account(gen_id(Numeric.randomize(token, i))) end)
   end
 
   def show(token, acc_id) do
@@ -60,11 +60,11 @@ defmodule TellerSandbox.Contexts.Accounts do
     end
   end
 
-  defp gen_id(token), do: "acc_" <> Id.get_id_one(token)
+  defp gen_id(token), do: "acc_" <> Id.generate(token)
 
   defp generate_account(acc_id) do
     %{
-      currency: gen_currency(acc_id),
+      currency: gen_currency(""),
       enrollment_id: gen_enrollment_id(acc_id),
       id: acc_id,
       account_id: acc_id,
@@ -83,7 +83,7 @@ defmodule TellerSandbox.Contexts.Accounts do
 
   defp gen_currency(_), do: "USD"
   defp gen_enrollment_id(acc_id), do: "enr_" <> Id.get_id_two(acc_id)
-  defp gen_account_number(acc_id), do: Id.get_numeric(acc_id) |> Integer.to_string()
+  defp gen_account_number(acc_id), do: Numeric.get_numeric(acc_id) |> Integer.to_string()
   defp gen_institution(acc_id), do: Institutions.get_inst(acc_id)
   defp gen_last_four(acc_id), do: gen_account_number(acc_id) |> String.slice(-4, 4)
 
@@ -112,12 +112,12 @@ defmodule TellerSandbox.Contexts.Accounts do
 
   defp gen_routing_numbers(token) do
     %{
-      ach: Id.get_numeric(gen_institution(token).id) |> Integer.to_string()
+      ach: Numeric.get_numeric(gen_institution(token).id) |> Integer.to_string()
     }
   end
 
   defp gen_name(token), do: Names.gen_acc_name(token)
   defp gen_subtype(_), do: "checking"
   defp gen_type(_), do: "depository"
-  defp gen_available(token), do: Id.gen_available(token)
+  defp gen_available(token), do: Numeric.gen_available(token)
 end

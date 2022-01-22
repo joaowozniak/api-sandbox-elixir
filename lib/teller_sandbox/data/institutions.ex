@@ -1,5 +1,5 @@
 defmodule TellerSandbox.Data.Institutions do
-  alias TellerSandbox.Randomizer.Id
+  alias TellerSandbox.Randomizer.Numeric
 
   @names ["Chase", "Bank of America", "Wells Fargo", "Citibank", "Capital One"]
 
@@ -13,7 +13,7 @@ defmodule TellerSandbox.Data.Institutions do
   def get_inst(token) do
     Enum.at(
       @all_institutions,
-      Integer.mod(Id.get_numeric(token), length(@names))
+      Integer.mod(Numeric.get_numeric(token), length(@names))
     )
   end
 end

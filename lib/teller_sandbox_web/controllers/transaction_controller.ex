@@ -20,7 +20,7 @@ defmodule TellerSandboxWeb.TransactionController do
       cond do
         account ->
           transactions = Transactions.generate_transactions(Enum.at(account, 0))
-          transaction = Transactions.get_by_id(transactions, transaction_id)
+          transaction = [Transactions.show(transactions, transaction_id)]
 
           cond do
             transaction ->

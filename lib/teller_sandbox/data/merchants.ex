@@ -1,5 +1,5 @@
 defmodule TellerSandbox.Data.Merchants do
-  alias TellerSandbox.Randomizer.Id
+  alias TellerSandbox.Randomizer.Numeric
 
   @merchants [
     "Uber",
@@ -111,7 +111,7 @@ defmodule TellerSandbox.Data.Merchants do
     Enum.at(
       @merchants,
       Integer.mod(
-        Id.get_numeric(transaction_key),
+        Numeric.get_numeric(transaction_key),
         length(@merchants)
       )
     )
@@ -121,7 +121,7 @@ defmodule TellerSandbox.Data.Merchants do
     Enum.at(
       @categories,
       Integer.mod(
-        Id.get_numeric(transaction_key),
+        Numeric.get_numeric(transaction_key),
         length(@categories)
       )
     )

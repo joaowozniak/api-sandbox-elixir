@@ -11,6 +11,5 @@ defmodule TellerSandboxWeb.HelloController do
     conn
     |> put_resp_content_type("application/json")
     |> json(%{message: message})
-
   end
 end

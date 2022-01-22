@@ -1,84 +1,21 @@
 defmodule TellerSandbox.Contexts.Transactions do
   alias TellerSandbox.Data.{Merchants}
+  alias TellerSandbox.Randomizer.{Numeric}
 
   @base_link "http://localhost:4000/accounts/"
-
-  defp get_pseudo_random_from_string(str) do
-    :sha256 |> :crypto.hash(str) |> :erlang.phash2()
-  end
-
-  defp generate_amount(str) do
-    max_val = 100
-    Enum.at(Enum.to_list(1..max_val), Integer.mod(get_pseudo_random_from_string(str), max_val))
-  end
-
-  defp get_alfanumeric_from_string(str, date) do
-    :sha256
-    |> :crypto.hash(str <> Calendar.strftime(date, "%y-%m-%d"))
-    |> Base.encode16()
-    |> String.downcase()
-    |> String.slice(0, 20)
-  end
 
   def generate_transactions(account) do
     start_date = Date.utc_today()
     end_date = Date.add(start_date, -10)
 
-    running_balance = account.available
-    account_id = account.account_id
+    running_balance = get_running_balance(account)
 
     [transactions, _] =
       Date.range(end_date, start_date)
       |> Enum.reduce([[], Decimal.new(running_balance)], fn date,
                                                             [transactions, running_balance] ->
-        transaction_key =
-          :sha256
-          |> :crypto.hash(get_alfanumeric_from_string(account_id, date))
-          |> Base.encode16()
-          |> String.downcase()
-          |> String.slice(0, 20)
-
-        transaction_id = "txn_" <> transaction_key
-        amount = generate_amount(transaction_key)
-
-        merchant = Merchants.gen_merch(transaction_key)
-
-        category = Merchants.gen_categ(transaction_key)
-
-        description = merchant
-
-        counterparty = %{
-          name: String.upcase(merchant),
-          type: "organization"
-        }
-
-        details = %{
-          category: category,
-          counterparty: counterparty,
-          processing_status: "complete"
-        }
-
-        links = %{
-          account: @base_link <> "#{account_id}",
-          self: @base_link <> "#{account_id}" <> "/transactions/" <> transaction_id
-        }
-
-        status = "posted"
-        type = "card_payment"
-
-        transaction = %{
-          account_id: account_id,
-          amount: Decimal.negate(amount),
-          date: date,
-          description: description,
-          details: details,
-          id: transaction_id,
-          links: links,
-          running_balance: running_balance,
-          status: status,
-          type: type
-        }
-
+        transaction = generate_transaction(account, date)
+        amount = get_amount(get_trans_key(account, date))
         running_balance = Decimal.sub(running_balance, amount)
 
         [[transaction | transactions], running_balance]
@@ -87,7 +24,57 @@ defmodule TellerSandbox.Contexts.Transactions do
     transactions
   end
 
-  def get_by_id(transactions, transaction_id) do
+  def show(transactions, transaction_id) do
     Enum.find(transactions, fn trans -> trans.id == transaction_id end)
   end
+
+  defp generate_transaction(account, date) do
+    trans_key = get_trans_key(account, date)
+
+    %{
+      account_id: get_acc_id(account),
+      amount: get_amount(trans_key),
+      date: date,
+      description: get_merchant(trans_key),
+      details:
+        get_details(
+          get_category(trans_key),
+          get_counterparty(get_merchant(trans_key))
+        ),
+      id: get_trans_id(trans_key),
+      links: gen_links(get_acc_id(account), get_trans_id(trans_key)),
+      running_balance: get_running_balance(account),
+      status: get_status(""),
+      type: get_type("")
+    }
+  end
+
+  defp get_acc_id(acc), do: acc.account_id
+  defp get_trans_key(acc, date), do: Numeric.gen_trans_key(get_acc_id(acc), date)
+  defp get_amount(trans_key), do: Decimal.negate(Numeric.generate_amount(trans_key))
+  defp get_merchant(trans_key), do: Merchants.gen_merch(trans_key)
+  defp get_category(trans_key), do: Merchants.gen_categ(trans_key)
+  defp get_running_balance(acc), do: acc.available
+  defp get_trans_id(trans_key), do: "txn_" <> trans_key
+  defp get_status(_), do: "posted"
+  defp get_type(_), do: "card_payment"
+
+  defp get_counterparty(merchant),
+    do: %{
+      name: String.upcase(merchant),
+      type: "organization"
+    }
+
+  defp get_details(category, counterparty),
+    do: %{
+      category: category,
+      counterparty: counterparty,
+      processing_status: "complete"
+    }
+
+  defp gen_links(acc_id, transaction_id),
+    do: %{
+      account: @base_link <> "#{acc_id}",
+      self: @base_link <> "#{acc_id}" <> "/transactions/" <> "#{transaction_id}"
+    }
 end

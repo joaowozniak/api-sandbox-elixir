@@ -1,5 +1,5 @@
 defmodule TellerSandbox.Data.Names do
-  alias TellerSandbox.Randomizer.Id
+  alias TellerSandbox.Randomizer.Numeric
 
   @names [
     "My Checking",
@@ -16,7 +16,7 @@ defmodule TellerSandbox.Data.Names do
     Enum.at(
       @names,
       Integer.mod(
-        Id.get_numeric(String.reverse(token)),
+        Numeric.get_numeric(String.reverse(token)),
         length(@names)
       )
     )
