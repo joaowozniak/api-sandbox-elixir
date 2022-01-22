@@ -14,7 +14,7 @@ defmodule TellerSandbox.Contexts.Transactions do
       Date.range(end_date, start_date)
       |> Enum.reduce([[], Decimal.new(running_balance)], fn date,
                                                             [transactions, running_balance] ->
-        transaction = generate_transaction(account, date)
+        transaction = generate_transaction(account, date, running_balance)
         amount = get_amount(get_trans_key(account, date))
         running_balance = Decimal.sub(running_balance, amount)
 
@@ -28,12 +28,12 @@ defmodule TellerSandbox.Contexts.Transactions do
     Enum.find(transactions, fn trans -> trans.id == transaction_id end)
   end
 
-  defp generate_transaction(account, date) do
+  defp generate_transaction(account, date, running_balance) do
     trans_key = get_trans_key(account, date)
 
     %{
       account_id: get_acc_id(account),
-      amount: get_amount(trans_key),
+      amount: Decimal.negate(get_amount(trans_key)),
       date: date,
       description: get_merchant(trans_key),
       details:
@@ -43,7 +43,7 @@ defmodule TellerSandbox.Contexts.Transactions do
         ),
       id: get_trans_id(trans_key),
       links: gen_links(get_acc_id(account), get_trans_id(trans_key)),
-      running_balance: get_running_balance(account),
+      running_balance: running_balance,
       status: get_status(""),
       type: get_type("")
     }
@@ -51,7 +51,7 @@ defmodule TellerSandbox.Contexts.Transactions do
 
   defp get_acc_id(acc), do: acc.account_id
   defp get_trans_key(acc, date), do: Numeric.gen_trans_key(get_acc_id(acc), date)
-  defp get_amount(trans_key), do: Decimal.negate(Numeric.generate_amount(trans_key))
+  defp get_amount(trans_key), do: Numeric.generate_amount(trans_key)
   defp get_merchant(trans_key), do: Merchants.gen_merch(trans_key)
   defp get_category(trans_key), do: Merchants.gen_categ(trans_key)
   defp get_running_balance(acc), do: acc.available
