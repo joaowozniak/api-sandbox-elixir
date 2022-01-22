@@ -21,76 +21,71 @@ defmodule TellerSandbox.Contexts.Accounts do
   def all(token) do
     cond do
       String.length(token) == 21 ->
-        [Map.take(generate_account(token), @accounts)]
+        [Map.take(generate_account(gen_id(token)), @accounts)]
 
-      true ->
-        :ok
+      String.length(token) == 33 ->
+        nr_accounts = 3
+        acs = generate_accounts(token, nr_accounts)
+        Enum.map(acs, fn i -> Map.take(i, @accounts) end)
     end
   end
 
+  defp generate_accounts(token, nr_accs) do
+    Enum.map(1..nr_accs, fn i -> generate_account(gen_id(Id.randomize(token, i))) end)
+  end
+
   def show(token, acc_id) do
-    [Enum.find([Map.take(generate_account(token), @accounts)], fn acc -> acc.id == acc_id end)]
+    accounts = all(token)
+
+    if Enum.any?(accounts, fn acc -> acc.id == acc_id end) do
+      [Map.take(generate_account(acc_id), @accounts)]
+    end
   end
 
   def details(token, acc_id) do
-    account =
-      Enum.find([Map.take(generate_account(token), @details)], fn acc ->
-        acc.account_id == acc_id
-      end)
+    accounts = all(token)
 
-    if account do
+    if Enum.any?(accounts, fn acc -> acc.id == acc_id end) do
+      account = Map.take(generate_account(acc_id), @details)
       [Map.put(account, :links, gen_detail_links(acc_id))]
     end
   end
 
   def balances(token, acc_id) do
-    account =
-      Enum.find([Map.take(generate_account(token), @balances)], fn acc ->
-        acc.account_id == acc_id
-      end)
+    accounts = all(token)
 
-    if account do
+    if Enum.any?(accounts, fn acc -> acc.id == acc_id end) do
+      account = Map.take(generate_account(acc_id), @balances)
       [Map.put(account, :links, gen_balances_links(acc_id))]
     end
   end
 
-  defp generate_accounts(token, iterator) do
-    [accounts, _] =
-      iterator
-      |> Enum.reduce([[], token], fn i, [accounts, token] ->
-        account = generate_account(token)
-        token = randomize(token, i)
-        [[[Map.take(account, @account_keys)] | accounts], token]
-      end)
+  defp gen_id(token), do: "acc_" <> Id.get_id_one(token)
 
-    accounts
-  end
-
-  defp generate_account(token) do
+  defp generate_account(acc_id) do
     %{
-      currency: gen_currency(token),
-      enrollment_id: gen_enrollment_id(token),
-      id: gen_id(token),
-      account_id: gen_id(token),
-      account_number: gen_account_number(token),
-      institution: gen_institution(token),
-      last_four: gen_last_four(token),
-      links: gen_links(gen_id(token)),
-      routing_numbers: gen_routing_numbers(token),
-      name: gen_name(token),
-      subtype: gen_subtype(token),
-      type: gen_type(token),
-      available: gen_available(token),
-      ledger: gen_available(token)
+      currency: gen_currency(acc_id),
+      enrollment_id: gen_enrollment_id(acc_id),
+      id: acc_id,
+      account_id: acc_id,
+      account_number: gen_account_number(acc_id),
+      institution: gen_institution(acc_id),
+      last_four: gen_last_four(acc_id),
+      links: gen_links(acc_id),
+      routing_numbers: gen_routing_numbers(acc_id),
+      name: gen_name(acc_id),
+      subtype: gen_subtype(acc_id),
+      type: gen_type(acc_id),
+      available: gen_available(acc_id),
+      ledger: gen_available(acc_id)
     }
   end
 
-  defp gen_currency(_token), do: "USD"
-  defp gen_enrollment_id(token), do: "enr_" <> Id.get_id_two(token)
-  defp gen_id(token), do: "acc_" <> Id.get_id_one(token)
-  defp gen_account_number(token), do: Id.get_numeric(token) |> Integer.to_string()
-  defp gen_institution(token), do: Institutions.get_inst(token)
-  defp gen_last_four(token), do: gen_account_number(token) |> String.slice(-4, 4)
+  defp gen_currency(_), do: "USD"
+  defp gen_enrollment_id(acc_id), do: "enr_" <> Id.get_id_two(acc_id)
+  defp gen_account_number(acc_id), do: Id.get_numeric(acc_id) |> Integer.to_string()
+  defp gen_institution(acc_id), do: Institutions.get_inst(acc_id)
+  defp gen_last_four(acc_id), do: gen_account_number(acc_id) |> String.slice(-4, 4)
 
   defp gen_links(acc_id) do
     %{
@@ -122,15 +117,7 @@ defmodule TellerSandbox.Contexts.Accounts do
   end
 
   defp gen_name(token), do: Names.gen_acc_name(token)
-  defp gen_subtype(_token), do: "checking"
-  defp gen_type(_token), do: "depository"
-
-  defp gen_available(token),
-    do: Id.get_numeric(token) |> Integer.to_string() |> String.slice(0, 5)
-
-  defp randomize(token, iterator) do
-    :sha256
-    |> :crypto.hash(token |> String.slice(iterator * 11, String.length(token)))
-    |> Base.encode64()
-  end
+  defp gen_subtype(_), do: "checking"
+  defp gen_type(_), do: "depository"
+  defp gen_available(token), do: Id.gen_available(token)
 end
