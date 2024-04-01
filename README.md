@@ -3,7 +3,6 @@
 ## Introduction
 
 API Sandbox that returns bank account and transaction data mimicking the same schema as that in production.
-This project's requirements were provided by the Teller.io programming challenge.
 
 ## Description
 
